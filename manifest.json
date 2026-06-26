@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "LocalLLM Checker",
+  "version": "1.0.0",
+  "description": "新着メールをローカルLLMで読み、指示に従って通知の要否を判定します。",
+  "author": "kore1.618",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "localllm-checker@kore1618",
+      "strict_min_version": "128.0"
+    }
+  },
+  "permissions": [
+    "messagesRead",
+    "accountsRead",
+    "notifications",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "scripts": [
+      "lib/settings.js",
+      "lib/message.js",
+      "lib/llm.js",
+      "background.js"
+    ]
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png"
+  }
+}

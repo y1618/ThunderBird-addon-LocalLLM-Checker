@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LocalLLM Checker 設定</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <h1>LocalLLM Checker 設定</h1>
+
+    <section>
+      <label class="switch">
+        <input type="checkbox" id="enabled" />
+        <span>このアドオンを有効にする</span>
+      </label>
+    </section>
+
+    <section>
+      <h2>LLM 接続</h2>
+
+      <div class="field">
+        <span class="label">バックエンド</span>
+        <label class="radio">
+          <input type="radio" name="backend" value="ollama" /> Ollama
+        </label>
+        <label class="radio">
+          <input type="radio" name="backend" value="openai" /> OpenAI 互換 (LM Studio / llama.cpp 等)
+        </label>
+      </div>
+
+      <div class="field">
+        <label class="label" for="endpoint">エンドポイント URL</label>
+        <input type="text" id="endpoint" placeholder="http://localhost:11434" />
+        <p class="hint">
+          Ollama 例: <code>http://localhost:11434</code> ／ OpenAI 互換 例:
+          <code>http://localhost:1234/v1</code>
+        </p>
+      </div>
+
+      <div class="field">
+        <label class="label" for="model">モデル名</label>
+        <input type="text" id="model" placeholder="gpt-oss:120b" />
+      </div>
+
+      <div class="field" id="apiKeyRow">
+        <label class="label" for="apiKey">API キー（任意）</label>
+        <input type="password" id="apiKey" placeholder="OpenAI 互換サーバが要求する場合のみ" />
+      </div>
+
+      <div class="field">
+        <button type="button" id="test">接続テスト</button>
+        <span id="testResult" class="status"></span>
+      </div>
+    </section>
+
+    <section>
+      <h2>通知の判定基準</h2>
+      <p class="hint">チェックした基準を総合して LLM が通知の要否を判定します。</p>
+      <label class="check"><input type="checkbox" id="addressedToMe" /> 自分(To/Cc)宛で、個人的な内容のときだけ通知</label>
+      <label class="check"><input type="checkbox" id="needsReply" /> 返信・対応が必要な内容のときだけ通知</label>
+      <label class="check"><input type="checkbox" id="important" /> 重要・緊急・見逃せない内容を通知</label>
+      <label class="check"><input type="checkbox" id="excludeBulk" /> メルマガ・広告・自動送信は通知しない</label>
+
+      <div class="field">
+        <label class="label" for="customInstruction">追加の指示（自由記述）</label>
+        <textarea id="customInstruction" rows="4"
+          placeholder="例: 上司の田中さんからのメールは必ず通知。請求書や契約に関するものも通知して。"></textarea>
+      </div>
+    </section>
+
+    <section>
+      <h2>動作</h2>
+      <label class="check">
+        <input type="checkbox" id="failOpen" /> LLM に接続できないときは念のため通知する（フェイルセーフ）
+      </label>
+      <div class="field">
+        <label class="label" for="maxBodyChars">LLM に渡す本文の最大文字数</label>
+        <input type="number" id="maxBodyChars" min="500" step="500" />
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="button" id="save" class="primary">保存</button>
+      <span id="status" class="status"></span>
+    </div>
+
+    <script src="lib/settings.js"></script>
+    <script src="lib/message.js"></script>
+    <script src="lib/llm.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

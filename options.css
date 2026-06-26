@@ -1,0 +1,162 @@
+:root {
+  --fg: #1a1a1a;
+  --muted: #666;
+  --border: #ccc;
+  --accent: #0a64c8;
+  --ok: #1a7f37;
+  --error: #c0362c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN",
+    Meiryo, sans-serif;
+  color: var(--fg);
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  line-height: 1.6;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 0 0 16px;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+section {
+  margin: 24px 0;
+}
+
+.field {
+  margin: 12px 0;
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.radio,
+.check,
+.switch {
+  display: block;
+  margin: 6px 0;
+  cursor: pointer;
+}
+
+.radio {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+.switch span {
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 4px 0 0;
+}
+
+code {
+  background: #f0f0f0;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+button {
+  font: inherit;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #f6f6f6;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ececec;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+button.primary:hover {
+  filter: brightness(1.08);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.status {
+  font-size: 0.9rem;
+}
+
+.status.ok {
+  color: var(--ok);
+}
+
+.status.error {
+  color: var(--error);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #e8e8e8;
+    --muted: #aaa;
+    --border: #555;
+    --accent: #4c9bf0;
+  }
+  body {
+    background: #1e1e1e;
+  }
+  input,
+  textarea {
+    background: #2a2a2a;
+    color: var(--fg);
+  }
+  button {
+    background: #333;
+    color: var(--fg);
+  }
+  button:hover {
+    background: #3c3c3c;
+  }
+  code {
+    background: #333;
+  }
+}

@@ -1,0 +1,88 @@
+# LocalLLM Checker — Thunderbird アドオン
+
+新着メールが届くと、ローカルで動く LLM（Ollama / LM Studio 等）にメール本文・差出人・
+宛先を読ませ、**あなたが定義した基準**に従ってデスクトップ通知を「出す / 出さない」を
+自動判定する Thunderbird 拡張機能です。
+
+- 「自分宛で返信が必要なメールだけ通知してほしい」
+- 「メルマガや自動送信は通知しないでほしい」
+
+といった判断を、ローカル LLM の意味理解で行います。メール内容は外部に送られず、
+あなたのマシン上の LLM だけで処理されます。
+
+## 必要なもの
+
+- Thunderbird 128 ESR 以降
+- ローカル LLM サーバのいずれか
+  - **Ollama** … `ollama serve`（既定 `http://localhost:11434`）。例: `ollama pull gpt-oss:120b`
+  - **OpenAI 互換** … LM Studio / llama.cpp `--api` / vLLM など（例 `http://localhost:1234/v1`）
+
+## 開発用に読み込む（一時インストール）
+
+1. ローカル LLM を起動しておく（例: `ollama run gpt-oss:120b`）。
+2. Thunderbird → メニュー → **アドオンとテーマ** → 歯車アイコン → **アドオンをデバッグ**
+   （または URL バーに `about:debugging` を開く）。
+3. **一時的なアドオンを読み込む** をクリックし、本フォルダの `manifest.json` を選択。
+4. アドオン一覧の本拡張の **設定** からオプション画面を開き、バックエンド・エンドポイント・
+   モデル名・判定基準を設定 → **接続テスト** で疎通を確認。
+
+> 一時インストールは Thunderbird を再起動すると消えます。恒久利用は下記のパッケージ参照。
+
+## 設定項目
+
+| 項目 | 説明 |
+| --- | --- |
+| バックエンド | `Ollama` または `OpenAI 互換` |
+| エンドポイント URL | Ollama は `http://localhost:11434`、OpenAI 互換は `…/v1` まで |
+| モデル名 | 例: `gpt-oss:120b`, `qwen3`, `llama3.3` |
+| API キー | OpenAI 互換サーバが要求する場合のみ（ローカルは通常不要） |
+| 判定基準（トグル） | 自分宛/返信要否/重要度/一斉配信除外 を組み合わせ |
+| 追加の指示 | 自由記述。「上司◯◯さんは必ず通知」等を自然文で |
+| フェイルセーフ | LLM 接続失敗時に念のため通知するか（既定 ON） |
+| 本文の最大文字数 | LLM に渡す本文を切り詰める上限（既定 6000） |
+
+## 仕組み（概要）
+
+`background.js` が `messenger.messages.onNewMailReceived` を購読し、新着を直列キューで
+1 通ずつ処理します。各メールは本文（text/plain 優先、無ければ HTML をテキスト化）と
+ヘッダを抽出し、あなたの全アカウントの自分のメールアドレスとともに LLM へ渡します。
+LLM は `{"notify": <bool>, "reason": "<理由>"}` を返し、`notify=true` のときだけ通知します。
+
+```
+manifest.json     … 拡張のメタ情報・権限・background/options 宣言
+background.js      … 新着監視・キュー・通知
+lib/settings.js    … 既定値と storage.local の読み書き
+lib/message.js     … 本文/ヘッダ抽出・自分のアドレス取得
+lib/llm.js         … プロンプト生成・Ollama/OpenAI 呼び出し・JSON パース
+options.html/js/css… 設定画面（接続テスト付き）
+icons/             … アイコン
+```
+
+## 配布用にパッケージする（.xpi）
+
+本フォルダ直下（`manifest.json` がルートに来るように）で zip 化します。
+
+```bash
+zip -r -FS ../localllm-checker.xpi . -x '*.git*' -x 'README.md'
+# または web-ext を使う場合:
+#   npm install -g web-ext && web-ext build
+```
+
+個人利用なら署名不要です。`addons.thunderbird.net` で配布する場合は署名が必要です。
+
+## トラブルシュート
+
+- **通知が出ない**: オプションの「接続テスト」を実行。`background` のログは
+  `about:debugging` → 本拡張の **検証 (Inspect)** で確認できます。
+- **localhost に繋がらない**: LLM サーバが起動しているか、エンドポイント URL とポートを確認。
+  Ollama は `127.0.0.1`/`localhost` のいずれでも可。別ホスト/別ポートを使う場合は
+  `manifest.json` の `host_permissions` にそのホストを追加してください。
+- **判定が不安定**: モデルを変える、または「追加の指示」で基準を具体化すると安定します。
+
+## 注意 / 既知の制限
+
+- MV3 の非永続バックグラウンドはアイドル時にアンロードされますが、新着イベントで起床します。
+  通知クリックで該当メールを開く対応表はメモリ上に持つため、長時間後のクリックでは
+  開けないことがあります（通知自体は表示されます）。
+- HTML 専用メールのテキスト化は簡易実装です。
+- 迷惑メールフォルダへの配信はスキップします。
