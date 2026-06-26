@@ -86,3 +86,7 @@ zip -r -FS ../localllm-checker.xpi . -x '*.git*' -x 'README.md'
   開けないことがあります（通知自体は表示されます）。
 - HTML 専用メールのテキスト化は簡易実装です。
 - 迷惑メールフォルダへの配信はスキップします。
+
+## ライセンス
+
+[MIT License](LICENSE) © 2026 y1618
