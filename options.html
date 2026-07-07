@@ -43,9 +43,13 @@
         <input type="text" id="model" placeholder="gpt-oss:120b" />
       </div>
 
-      <div class="field" id="apiKeyRow">
+      <div class="field">
         <label class="label" for="apiKey">API キー（任意）</label>
-        <input type="password" id="apiKey" placeholder="OpenAI 互換サーバが要求する場合のみ" />
+        <input type="password" id="apiKey" placeholder="認証付きサーバ経由の場合のみ" />
+        <p class="hint">
+          Open WebUI 等の認証付きサーバ経由で使う場合に設定します。
+          ローカルの Ollama / LM Studio 単体では不要です。
+        </p>
       </div>
 
       <div class="field">

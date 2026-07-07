@@ -41,6 +41,24 @@
 | フェイルセーフ | LLM 接続失敗時に念のため通知するか（既定 ON） |
 | 本文の最大文字数 | LLM に渡す本文を切り詰める上限（既定 6000） |
 
+## Open WebUI 経由で使う（API キー認証）
+
+Ollama を [Open WebUI](https://github.com/open-webui/open-webui) 経由で使うと、
+API キーでアクセス制御でき、後述の `OLLAMA_ORIGINS` の設定も不要になります
+（Origin チェックは Open WebUI がサーバ側で Ollama を呼ぶため発生しません）。
+
+| 設定項目 | 値 |
+| --- | --- |
+| バックエンド | **OpenAI 互換** |
+| エンドポイント URL | `http://localhost:3000/api`（`/chat/completions` は自動で付与） |
+| モデル名 | Open WebUI のモデル一覧に表示される名前（例: `qwen3:8b`） |
+| API キー | Open WebUI の **設定 → アカウント → API キー** で発行した `sk-…` |
+
+※ 管理者設定で API キー認証が有効になっている必要があります
+（管理者パネル → 設定 → 一般）。
+※ Open WebUI が別マシン/別ホスト名で動いている場合は、`manifest.json` の
+`host_permissions` にそのホスト（例: `http://192.168.1.10/*`）を追加してください。
+
 ## 仕組み（概要）
 
 `background.js` が `messenger.messages.onNewMailReceived` を購読し、新着を直列キューで
@@ -91,6 +109,7 @@ zip -r -FS ../localllm-checker.xpi . -x '*.git*' -x 'README.md'
 
   ※ `OLLAMA_ORIGINS=*`（全許可）はブラウザ上の任意のサイトからアクセス可能に
   なるため推奨しません。`moz-extension://*` に限定してください。
+  なお「Open WebUI 経由で使う」構成（上記）ならこの設定自体が不要です。
 - **モデルが見つからないエラー**: `ollama list` でインストール済みモデル名を確認し、
   設定画面のモデル名を一致させてください（例: `qwen3-coder-next:q4_K_M`）。
 - **通知が出ない**: オプションの「接続テスト」を実行。`background` のログは

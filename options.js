@@ -29,7 +29,6 @@ async function restore() {
   $("customInstruction").value = s.customInstruction || "";
   $("maxBodyChars").value = s.maxBodyChars;
   $("failOpen").checked = s.failOpen;
-  updateApiKeyVisibility();
 }
 
 function currentSettings() {
@@ -62,10 +61,6 @@ async function save() {
   flash($("status"), "保存しました", "ok");
 }
 
-function updateApiKeyVisibility() {
-  $("apiKeyRow").style.display = getBackend() === "openai" ? "" : "none";
-}
-
 function onBackendChange() {
   const ep = $("endpoint");
   // 空、または他方のデフォルトのままなら、選択に合わせて URL を補完する。
@@ -79,7 +74,6 @@ function onBackendChange() {
         ? OPENAI_DEFAULT_ENDPOINT
         : OLLAMA_DEFAULT_ENDPOINT;
   }
-  updateApiKeyVisibility();
 }
 
 async function testConnection() {
