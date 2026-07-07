@@ -56,9 +56,44 @@ function flash(el, msg, kind) {
   el.className = "status " + (kind || "");
 }
 
+// エンドポイントの origin をホスト権限のマッチパターンに変換する
+// （Firefox のマッチパターンはポートを含められず、ポートは常に全許可扱い）。
+function originPattern(endpoint) {
+  try {
+    const u = new URL(endpoint);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    return `${u.protocol}//${u.hostname}/*`;
+  } catch (_) {
+    return null;
+  }
+}
+
+// エンドポイントのホストへのアクセス権限を要求する。許可済みならダイアログは
+// 表示されず true が返る。ユーザー操作ハンドラ内で最初に呼ぶこと。
+async function ensureHostPermission(endpoint) {
+  const pattern = originPattern(endpoint);
+  if (!pattern) return true; // URL不正は後段の fetch のエラー表示に任せる
+  try {
+    return await messenger.permissions.request({ origins: [pattern] });
+  } catch (e) {
+    console.warn("permissions.request failed", e);
+    return true;
+  }
+}
+
 async function save() {
-  await saveSettings(currentSettings());
-  flash($("status"), "保存しました", "ok");
+  const settings = currentSettings();
+  const granted = await ensureHostPermission(settings.endpoint);
+  await saveSettings(settings);
+  if (granted) {
+    flash($("status"), "保存しました", "ok");
+  } else {
+    flash(
+      $("status"),
+      "保存しましたが、このサーバへのアクセス権限が未許可のため接続できません",
+      "error"
+    );
+  }
 }
 
 function onBackendChange() {
@@ -77,8 +112,18 @@ function onBackendChange() {
 }
 
 async function testConnection() {
-  flash($("testResult"), "テスト中…", "");
   const settings = currentSettings();
+  // 権限要求はユーザー操作の文脈が必要なため、他の await より先に行う。
+  const granted = await ensureHostPermission(settings.endpoint);
+  if (!granted) {
+    flash(
+      $("testResult"),
+      "失敗: このサーバへのアクセス権限が許可されませんでした",
+      "error"
+    );
+    return;
+  }
+  flash($("testResult"), "テスト中…", "");
   let myAddresses = [];
   try {
     myAddresses = await getMyAddresses();
@@ -113,6 +158,11 @@ async function testConnection() {
         'OLLAMA_ORIGINS="moz-extension://*" を設定して Ollama を再起動してください（README 参照）。';
     } else if (/not found/i.test(e.message)) {
       msg += "\n→ モデル名が正しいか確認してください（例: ollama list で一覧表示）。";
+    } else if (/NetworkError|Failed to fetch|aborted/i.test(e.message)) {
+      msg +=
+        "\n→ サーバに到達できません。URL と起動状態を確認してください。" +
+        "社内プロキシ環境では、Thunderbird の設定 →「接続設定」で" +
+        "このサーバを「プロキシなしで接続」に追加してください（README 参照）。";
     }
     flash($("testResult"), msg, "error");
   }
