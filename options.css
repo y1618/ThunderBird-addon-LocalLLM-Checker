@@ -124,6 +124,7 @@ button.primary:hover {
 
 .status {
   font-size: 0.9rem;
+  white-space: pre-line; /* エラーヒントの改行を表示 */
 }
 
 .status.ok {

@@ -72,6 +72,27 @@ zip -r -FS ../localllm-checker.xpi . -x '*.git*' -x 'README.md'
 
 ## トラブルシュート
 
+- **接続テストが `HTTP 403` で失敗する（Ollama）**: Ollama はブラウザ拡張からの
+  リクエスト（`Origin: moz-extension://…`）を既定で拒否します。API キーの問題では
+  ありません。環境変数 `OLLAMA_ORIGINS` に拡張機能の Origin を許可してください。
+
+  systemd で Ollama を動かしている場合（Linux の標準インストール）:
+
+  ```bash
+  sudo mkdir -p /etc/systemd/system/ollama.service.d
+  sudo tee /etc/systemd/system/ollama.service.d/allow-thunderbird.conf >/dev/null <<'EOF'
+  [Service]
+  Environment="OLLAMA_ORIGINS=moz-extension://*"
+  EOF
+  sudo systemctl daemon-reload && sudo systemctl restart ollama
+  ```
+
+  手動起動の場合: `OLLAMA_ORIGINS="moz-extension://*" ollama serve`
+
+  ※ `OLLAMA_ORIGINS=*`（全許可）はブラウザ上の任意のサイトからアクセス可能に
+  なるため推奨しません。`moz-extension://*` に限定してください。
+- **モデルが見つからないエラー**: `ollama list` でインストール済みモデル名を確認し、
+  設定画面のモデル名を一致させてください（例: `qwen3-coder-next:q4_K_M`）。
 - **通知が出ない**: オプションの「接続テスト」を実行。`background` のログは
   `about:debugging` → 本拡張の **検証 (Inspect)** で確認できます。
 - **localhost に繋がらない**: LLM サーバが起動しているか、エンドポイント URL とポートを確認。

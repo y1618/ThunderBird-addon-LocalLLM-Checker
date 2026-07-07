@@ -111,7 +111,16 @@ async function testConnection() {
       "ok"
     );
   } catch (e) {
-    flash($("testResult"), "失敗: " + e.message, "error");
+    let msg = "失敗: " + e.message;
+    // Ollama は既定でブラウザ拡張の Origin (moz-extension://…) を 403 で拒否する。
+    if (settings.backend === "ollama" && /HTTP 403/.test(e.message)) {
+      msg +=
+        "\n→ Ollama が拡張機能からのアクセスを拒否しています。" +
+        'OLLAMA_ORIGINS="moz-extension://*" を設定して Ollama を再起動してください（README 参照）。';
+    } else if (/not found/i.test(e.message)) {
+      msg += "\n→ モデル名が正しいか確認してください（例: ollama list で一覧表示）。";
+    }
+    flash($("testResult"), msg, "error");
   }
 }
 
