@@ -111,6 +111,53 @@ function onBackendChange() {
   }
 }
 
+// NetworkError 時の自動診断。バージョン・権限・素の GET の3点で原因を切り分ける。
+async function runNetworkDiag(settings) {
+  const lines = [];
+  try {
+    const info = await messenger.runtime.getBrowserInfo();
+    const manifest = messenger.runtime.getManifest();
+    lines.push(`環境: ${info.name} ${info.version} / アドオン v${manifest.version}`);
+  } catch (_) {
+    /* noop */
+  }
+  const pattern = originPattern(settings.endpoint);
+  if (pattern) {
+    try {
+      const has = await messenger.permissions.contains({ origins: [pattern] });
+      lines.push(
+        `ホスト権限 ${pattern}: ` +
+          (has ? "許可済み" : "未許可（接続テスト時のダイアログで許可してください）")
+      );
+    } catch (_) {
+      /* noop */
+    }
+  }
+  try {
+    const origin = new URL(settings.endpoint).origin;
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 5000);
+    try {
+      const r = await fetch(origin + "/", {
+        method: "GET",
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      lines.push(
+        `GET ${origin}/ → HTTP ${r.status}（サーバ到達OK。エンドポイントのパスやサーバ側 CORS 設定を確認）`
+      );
+    } finally {
+      clearTimeout(t);
+    }
+  } catch (e2) {
+    lines.push(
+      `GET も失敗: ${e2.message}` +
+        "（DNS/到達性/プロキシ/DoH の問題。URL をホスト名から IP 直指定に変えても試してください）"
+    );
+  }
+  return lines.join("\n");
+}
+
 async function testConnection() {
   const settings = currentSettings();
   // 権限要求はユーザー操作の文脈が必要なため、他の await より先に行う。
@@ -160,9 +207,9 @@ async function testConnection() {
       msg += "\n→ モデル名が正しいか確認してください（例: ollama list で一覧表示）。";
     } else if (/NetworkError|Failed to fetch|aborted/i.test(e.message)) {
       msg +=
-        "\n→ サーバに到達できません。URL と起動状態を確認してください。" +
-        "社内プロキシ環境では、Thunderbird の設定 →「接続設定」で" +
-        "このサーバを「プロキシなしで接続」に追加してください（README 参照）。";
+        "\n→ サーバに到達できません。自動診断:\n" +
+        (await runNetworkDiag(settings)) +
+        "\n（プロキシ除外・DoH 等は README のトラブルシュート参照）";
     }
     flash($("testResult"), msg, "error");
   }
