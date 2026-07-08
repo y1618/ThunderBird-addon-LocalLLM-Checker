@@ -114,6 +114,10 @@ zip -r -FS ../localllm-checker.xpi . -x '*.git*' -x 'README.md'
 - **モデルが見つからないエラー**: `ollama list` でインストール済みモデル名を確認し、
   設定画面のモデル名を一致させてください（例: `qwen3-coder-next:q4_K_M`）。
 - **`NetworkError` で失敗する（社内プロキシ環境・別マシンのサーバ）**: 次を順に確認:
+  0. **アドオンが v1.0.4 以上か確認**: v1.0.3 以前は MV3 の既定 CSP
+     (`upgrade-insecure-requests`) により `http://` のリクエストが強制的に
+     `https://` へ書き換えられ、localhost 以外の http サーバには接続できません
+     でした（v1.0.4 で CSP を上書きして修正）。
   1. **サーバへの到達性**: 同じマシンのターミナルから
      `curl http://<サーバ>:<ポート>/health` 等で応答するか確認。
   2. **ホスト権限**: `localhost` 以外のサーバは、初回の「接続テスト」時に
