@@ -74,6 +74,20 @@
     </section>
 
     <section>
+      <h2>通知の表示</h2>
+      <label class="check">
+        <input type="checkbox" id="persistentNotify" />
+        クリックするか閉じるまで通知を繰り返し表示する（約1分間隔・最長24時間）
+      </label>
+      <label class="check"><input type="checkbox" id="notifyShowSender" /> 通知に差出人を表示する</label>
+      <label class="check"><input type="checkbox" id="notifyShowSubject" /> 通知に件名を表示する</label>
+      <p class="hint">
+        プライバシー保護のため、既定では差出人・件名・本文を表示せず、
+        LLM の判定理由のみを通知に表示します。
+      </p>
+    </section>
+
+    <section>
       <h2>動作</h2>
       <label class="check">
         <input type="checkbox" id="failOpen" /> LLM に接続できないときは念のため通知する（フェイルセーフ）

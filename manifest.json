@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LocalLLM Checker",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "新着メールをローカルLLMで読み、指示に従って通知の要否を判定します。",
   "author": "kore1.618",
   "browser_specific_settings": {
@@ -14,7 +14,8 @@
     "messagesRead",
     "accountsRead",
     "notifications",
-    "storage"
+    "storage",
+    "alarms"
   ],
   "host_permissions": [
     "http://localhost/*",

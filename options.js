@@ -29,6 +29,9 @@ async function restore() {
   $("customInstruction").value = s.customInstruction || "";
   $("maxBodyChars").value = s.maxBodyChars;
   $("failOpen").checked = s.failOpen;
+  $("persistentNotify").checked = s.persistentNotify;
+  $("notifyShowSender").checked = s.notifyShowSender;
+  $("notifyShowSubject").checked = s.notifyShowSubject;
 }
 
 function currentSettings() {
@@ -48,6 +51,9 @@ function currentSettings() {
     maxBodyChars: parseInt($("maxBodyChars").value, 10) || 6000,
     failOpen: $("failOpen").checked,
     requestTimeoutMs: 60000,
+    persistentNotify: $("persistentNotify").checked,
+    notifyShowSender: $("notifyShowSender").checked,
+    notifyShowSubject: $("notifyShowSubject").checked,
   };
 }
 
